@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
+const { google } = require("googleapis");  // ✅ Google OAuth
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -59,11 +60,29 @@ app.post("/mcp/run/create_reservation", (req, res) => {
 // ---------------------
 // Google OAuth Routes
 // ---------------------
-// TODO: Insert your existing Google OAuth setup here
-// Example:
-// app.get("/auth/google", (req, res) => { ... });
-// app.get("/oauth2callback", (req, res) => { ... });
+const oauth2Client = new google.auth.OAuth2(
+  process.env.GOOGLE_CLIENT_ID,
+  process.env.GOOGLE_CLIENT_SECRET,
+  "https://mcp-calendar-server.onrender.com/oauth2callback"  // ✅ callback matches domain
+);
+
+app.get("/auth/google", (req, res) => {
+  const scopes = ["https://www.googleapis.com/auth/calendar"];
+  const url = oauth2Client.generateAuthUrl({
+    access_type: "offline",
+    scope: scopes,
+  });
+  res.redirect(url);
+});
+
+app.get("/oauth2callback", async (req, res) => {
+  const code = req.query.code;
+  const { tokens } = await oauth2Client.getToken(code);
+  oauth2Client.setCredentials(tokens);
+
+  res.send("✅ Google Calendar authorization is complete. You can now use MCP tools.");
+});
 
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`🚀 MCP + Google OAuth server listening on port ${PORT}`);
+  console.log(`🚀 MCP + Google OAuth server running on port ${PORT}`);
 });
