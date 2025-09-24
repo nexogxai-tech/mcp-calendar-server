@@ -1,5 +1,5 @@
 {
-   "name": "mcp-calendar-server",
+  "name": "mcp-calendar-server",
   "version": "1.0.0",
   "description": "MCP server for handling reservations and tools",
   "main": "server.js",
@@ -10,7 +10,8 @@
   "dependencies": {
     "body-parser": "^1.20.2",
     "express": "^4.18.2",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "googleapis": "^133.0.0"   // ✅ Added
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
@@ -20,4 +21,3 @@
   },
   "license": "MIT"
 }
-
