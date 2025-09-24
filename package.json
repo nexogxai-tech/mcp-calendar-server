@@ -1,9 +1,7 @@
 {
   "name": "mcp-calendar-server",
   "version": "1.0.0",
-  "description": "MCP server for handling reservations and Google Calendar integration",
   "main": "server.js",
-  "type": "module",
   "scripts": {
     "start": "node server.js"
   },
