@@ -3,12 +3,10 @@ const express = require("express");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(express.json()); // so we can parse JSON bodies
+app.use(express.json()); // parse JSON request bodies
 
 // MCP tools endpoint (tells ElevenLabs what tools exist)
 app.get("/mcp/tools", (req, res) => {
-  console.log("⚡ ElevenLabs requested /mcp/tools"); // 👈 log whenever ElevenLabs hits it
-
   res.json({
     tools: [
       {
@@ -30,11 +28,12 @@ app.get("/mcp/tools", (req, res) => {
   });
 });
 
-// MCP action endpoint (this is what actually runs when the tool is called)
+// MCP action endpoint (this is what runs when ElevenLabs calls the tool)
 app.post("/mcp/run/create_reservation", (req, res) => {
   const { customer_name, party_size, date, time, notes } = req.body;
 
-  console.log("📅 New Reservation received:", {
+  // For now just log it – later you’ll connect this to Google Calendar
+  console.log("📅 New Reservation:", {
     customer_name,
     party_size,
     date,
@@ -42,6 +41,7 @@ app.post("/mcp/run/create_reservation", (req, res) => {
     notes
   });
 
+  // Respond back so ElevenLabs knows it worked
   res.json({
     success: true,
     message: `Reservation created for ${customer_name} on ${date} at ${time} for ${party_size} guests.`,
@@ -50,4 +50,10 @@ app.post("/mcp/run/create_reservation", (req, res) => {
 
 // health check
 app.get("/", (req, res) => {
-  res.send("✅ M
+  res.send("✅ MCP Server is running!");
+});
+
+app.listen(PORT, () => {
+  console.log(`🚀 MCP server listening on port ${PORT}`);
+});
+
