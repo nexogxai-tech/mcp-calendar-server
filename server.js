@@ -1,7 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
-const { google } = require("googleapis");  // ✅ Google OAuth
+const { google } = require("googleapis");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -63,8 +63,12 @@ app.post("/mcp/run/create_reservation", (req, res) => {
 const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
-  "https://mcp-calendar-server.onrender.com/oauth2callback"  // ✅ callback matches domain
+  "https://mcp-calendar-server.onrender.com/oauth2callback" // ✅ Clean domain only
 );
+
+app.get("/", (req, res) => {
+  res.send("✅ Google Calendar MCP server is live");
+});
 
 app.get("/auth/google", (req, res) => {
   const scopes = ["https://www.googleapis.com/auth/calendar"];
