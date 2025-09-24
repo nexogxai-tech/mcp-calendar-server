@@ -1,7 +1,7 @@
 {
-  "name": "calendar-server",
+   "name": "mcp-calendar-server",
   "version": "1.0.0",
-  "description": "MCP server for reservations and calendar tools",
+  "description": "MCP server for handling reservations and tools",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -20,3 +20,4 @@
   },
   "license": "MIT"
 }
+
