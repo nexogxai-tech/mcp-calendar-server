@@ -1,17 +1,21 @@
+// service.js
 import express from "express";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Root dashboard
+app.use(express.json());
+
+// --- Health check ---
 app.get("/", (req, res) => {
-  res.send("MCP Google Calendar Server is running ✅");
+  res.send("✅ MCP Google Calendar Server is running");
 });
 
-// MCP endpoint
+// --- MCP Endpoint ---
 app.get("/mcp", (req, res) => {
   res.json({
     version: "1.0.0",
+    endpoint: "/mcp",
     tools: [
       {
         name: "create_event",
@@ -56,7 +60,7 @@ app.get("/mcp", (req, res) => {
   });
 });
 
-// Start server
+// --- Start server ---
 app.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
+  console.log(`🚀 MCP Server listening on port ${PORT}`);
 });
