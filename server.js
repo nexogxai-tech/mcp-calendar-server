@@ -9,18 +9,20 @@ app.get("/mcp/tools", (req, res) => {
     tools: [
       {
         name: "create_reservation",
-        description: "Creates a calendar reservation",
+        description: "Creates a calendar reservation in Google Calendar for Café Amore Bistro",
         input_schema: {
           type: "object",
           properties: {
-            date: { type: "string" },
+            customer_name: { type: "string" },
+            party_size: { type: "integer" },
+            date: { type: "string", format: "date" },
             time: { type: "string" },
-            name: { type: "string" },
+            notes: { type: "string" }
           },
-          required: ["date", "time", "name"],
-        },
-      },
-    ],
+          required: ["customer_name", "party_size", "date", "time"]
+        }
+      }
+    ]
   });
 });
 
