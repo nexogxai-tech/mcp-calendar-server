@@ -1,1 +1,1 @@
-# map-calendar-server
+# mcp-calendar-server
