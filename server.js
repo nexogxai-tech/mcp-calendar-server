@@ -3,14 +3,14 @@ import express from "express";
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(express.json()); // Parse JSON bodies
+app.use(express.json());
 
-// MCP tools definition
-const toolsDefinition = {
+// ✅ Define your tools object once
+const toolsResponse = {
   tools: [
     {
       name: "create_reservation",
-      description: "Creates a calendar reservation in Google Calendar",
+      description: "Creates a calendar reservation in Google Calendar for Café Amore Bistro",
       input_schema: {
         type: "object",
         properties: {
@@ -26,40 +26,21 @@ const toolsDefinition = {
   ],
 };
 
-// Expose MCP tools at /mcp/tools
-app.get("/mcp/tools", (req, res) => {
-  res.json(toolsDefinition);
-});
-
-// Alias: Expose MCP tools also at /mcp (in case the service only looks here)
+// ✅ Main MCP endpoint
 app.get("/mcp", (req, res) => {
-  res.json(toolsDefinition);
+  res.json(toolsResponse);
 });
 
-// MCP action endpoint (called when tool runs)
-app.post("/mcp/run/create_reservation", (req, res) => {
-  const { customer_name, party_size, date, time, notes } = req.body;
-
-  console.log("📅 New Reservation:", {
-    customer_name,
-    party_size,
-    date,
-    time,
-    notes,
-  });
-
-  res.json({
-    success: true,
-    message: `Reservation created for ${customer_name} on ${date} at ${time} for ${party_size} guests.`,
-  });
+// (Optional) backup endpoint for testing
+app.get("/mcp/tools", (req, res) => {
+  res.json(toolsResponse);
 });
 
-// Health check
+// health check
 app.get("/", (req, res) => {
   res.send("✅ MCP Server is running!");
 });
 
-// Start server
 app.listen(PORT, () => {
   console.log(`🚀 MCP server listening on port ${PORT}`);
 });
