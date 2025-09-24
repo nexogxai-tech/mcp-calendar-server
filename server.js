@@ -1,4 +1,3 @@
-// server.js
 const express = require("express");
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
@@ -143,23 +142,5 @@ app.post("/mcp/run/check_availability", async (req, res) => {
     if (events.data.items.length > 0) {
       res.json({ available: false, message: "Timeslot is booked", events: events.data.items });
     } else {
-      res.json({ available: true, message: "Timeslot is available" });
-    }
-  } catch (err) {
-    console.error("❌ Availability check failed:", err.message);
-    res.status(500).json({ success: false, error: "Failed to check availability" });
-  }
-});
+      res.json({ available: true, message: "
 
-// Cancel Reservation
-app.post("/mcp/run/cancel_reservation", async (req, res) => {
-  try {
-    const { event_id } = req.body;
-    if (!event_id) {
-      return res.status(400).json({ success: false, error: "Missing event_id" });
-    }
-
-    await calendar.events.delete({ calendarId: "primary", eventId: event_id });
-    res.json({ success: true, message: `Reservation ${event_id} cancelled` });
-  } catch (err) {
-    console.error("❌ Cance
