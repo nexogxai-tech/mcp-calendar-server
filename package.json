@@ -1,23 +1,17 @@
 {
-  "name": "cafe-amore-mcp",
+  "name": "custom-mcp-server",
   "version": "1.0.0",
-  "description": "MCP server for Café Amore Bistro reservation management (Google Calendar integration)",
+  "description": "A custom MCP server exposing reservation tools",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
+    "start": "node server.js"
   },
   "dependencies": {
     "body-parser": "^1.20.2",
     "express": "^4.18.2",
-    "googleapis": "^133.0.0",
     "morgan": "^1.10.0"
-  },
-  "devDependencies": {
-    "nodemon": "^3.0.1"
   },
   "engines": {
     "node": ">=18"
-  },
-  "license": "MIT"
+  }
 }
