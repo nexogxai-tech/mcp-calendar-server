@@ -1,96 +1,95 @@
-const express = require("express");
-const bodyParser = require("body-parser");
-const morgan = require("morgan");
-const { google } = require("googleapis");
+// server.js
+import express from "express";
+import bodyParser from "body-parser";
+import cors from "cors";
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 
+app.use(cors());
 app.use(bodyParser.json());
-app.use(morgan("⚡ :method :url from :remote-addr"));
 
-// -----------------------------
-// MCP Endpoints
-// -----------------------------
+// Root landing page (/mcp)
 app.get("/mcp", (req, res) => {
-  res.json({
-    name: "calendar-server",
-    version: "1.0.0",
-    description: "MCP server for reservations and calendar tools",
-    endpoints: {
-      tools: "/mcp/tools",
-      runTool: "/mcp/run/:tool"
-    }
-  });
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>MCP Google Calendar Server</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 20px; }
+          h1 { color: #333; }
+          .status { padding: 10px; margin: 10px 0; border: 1px solid #ccc; background: #e7f7e7; }
+          .tools { margin-top: 20px; }
+          ul { line-height: 1.6; }
+        </style>
+      </head>
+      <body>
+        <h1>MCP Google Calendar Server</h1>
+        <p><strong>Version:</strong> 1.0.0</p>
+        <div class="status">✅ Google Calendar Connected</div>
+        
+        <h2>MCP Endpoint</h2>
+        <code>https://mcp-calendar-server.onrender.com/mcp</code>
+
+        <div class="tools">
+          <h2>Available Tools</h2>
+          <ul>
+            <li><strong>create_event:</strong> Create a new Google Calendar event</li>
+            <li><strong>list_events:</strong> List Google Calendar events with optional filtering</li>
+            <li><strong>get_event:</strong> Get details of a specific Google Calendar event</li>
+            <li><strong>update_event:</strong> Update an existing Google Calendar event</li>
+            <li><strong>delete_event:</strong> Delete a Google Calendar event</li>
+            <li><strong>list_calendars:</strong> List all available Google Calendars</li>
+            <li><strong>search_events:</strong> Search events in Google Calendar</li>
+          </ul>
+        </div>
+
+        <h2>Other Endpoints</h2>
+        <ul>
+          <li><a href="/health">Health Check</a></li>
+          <li><a href="/server-info">Server Info</a></li>
+          <li><a href="/auth/google">Google Authentication</a></li>
+        </ul>
+      </body>
+    </html>
+  `);
 });
 
+// Example tool routes
 app.get("/mcp/tools", (req, res) => {
   res.json({
     tools: [
-      {
-        name: "create_reservation",
-        description: "Create a reservation in the calendar",
-        input_schema: {
-          type: "object",
-          properties: {
-            customer_name: { type: "string" },
-            party_size: { type: "number" },
-            date: { type: "string", format: "date" },
-            time: { type: "string" },
-            notes: { type: "string" }
-          },
-          required: ["customer_name", "party_size", "date", "time"]
-        }
-      }
-    ]
+      "create_event",
+      "list_events",
+      "get_event",
+      "update_event",
+      "delete_event",
+      "list_calendars",
+      "search_events",
+    ],
   });
 });
 
-app.post("/mcp/run/create_reservation", (req, res) => {
-  const { customer_name, party_size, date, time, notes } = req.body;
-  console.log("🎯 Reservation received:", req.body);
+app.post("/mcp/run/:tool", (req, res) => {
+  const { tool } = req.params;
+  const payload = req.body;
+  console.log(`🎯 POST /mcp/run/${tool} payload:`, payload);
 
   res.json({
-    success: true,
-    message: `Reservation created for ${customer_name} on ${date} at ${time} for ${party_size} people.`,
-    details: { customer_name, party_size, date, time, notes }
+    status: "success",
+    tool,
+    payload,
   });
 });
 
-// -----------------------------
-// Google OAuth Routes
-// -----------------------------
-const oauth2Client = new google.auth.OAuth2(
-  process.env.GOOGLE_CLIENT_ID,
-  process.env.GOOGLE_CLIENT_SECRET,
-  "https://mcp-calendar-server.onrender.com/oauth2callback" // ✅ Clean domain callback
+// Health + Server Info
+app.get("/health", (req, res) => res.json({ status: "ok", uptime: process.uptime() }));
+app.get("/server-info", (req, res) =>
+  res.json({ name: "MCP Google Calendar Server", version: "1.0.0", port: PORT })
 );
 
-app.get("/", (req, res) => {
-  res.send("✅ Google Calendar MCP server is live");
+// Start server
+app.listen(PORT, () => {
+  console.log(`🚀 MCP server listening on port ${PORT}`);
 });
-
-app.get("/auth/google", (req, res) => {
-  const scopes = ["https://www.googleapis.com/auth/calendar"];
-  const url = oauth2Client.generateAuthUrl({
-    access_type: "offline",
-    scope: scopes,
-  });
-  res.redirect(url);
-});
-
-app.get("/oauth2callback", async (req, res) => {
-  const code = req.query.code;
-  const { tokens } = await oauth2Client.getToken(code);
-  oauth2Client.setCredentials(tokens);
-
-  res.send("✅ Google Calendar authorization is complete. You can now use MCP tools.");
-});
-
-// -----------------------------
-// Start Server
-// -----------------------------
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`🚀 MCP + Google OAuth server running on port ${PORT}`);
-});
-
