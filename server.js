@@ -3,11 +3,14 @@ const bodyParser = require("body-parser");
 const morgan = require("morgan");
 
 const app = express();
-const PORT = process.env.PORT || 3000; // ✅ Render assigns PORT automatically
+const PORT = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 app.use(morgan("⚡ :method :url from :remote-addr"));
 
+// ---------------------
+// MCP Endpoints
+// ---------------------
 app.get("/mcp", (req, res) => {
   res.json({
     name: "calendar-server",
@@ -53,6 +56,14 @@ app.post("/mcp/run/create_reservation", (req, res) => {
   });
 });
 
-app.listen(PORT, "0.0.0.0", () => {   // ✅ important: bind to all interfaces
-  console.log(`🚀 MCP server listening on port ${PORT}`);
+// ---------------------
+// Google OAuth Routes
+// ---------------------
+// TODO: Insert your existing Google OAuth setup here
+// Example:
+// app.get("/auth/google", (req, res) => { ... });
+// app.get("/oauth2callback", (req, res) => { ... });
+
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`🚀 MCP + Google OAuth server listening on port ${PORT}`);
 });
