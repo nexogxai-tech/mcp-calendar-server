@@ -1,51 +1,31 @@
 const express = require("express");
+const bodyParser = require("body-parser");
 const morgan = require("morgan");
 
 const app = express();
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 3000; // ✅ Render assigns PORT automatically
 
-app.use(express.json());
-app.use(morgan("dev"));
+app.use(bodyParser.json());
+app.use(morgan("⚡ :method :url from :remote-addr"));
 
-// Health check
-app.get("/health", (req, res) => {
-  res.json({ status: "ok" });
-});
-
-// MCP metadata root
 app.get("/mcp", (req, res) => {
   res.json({
-    type: "server_metadata",
-    name: "custom-mcp-server",
+    name: "calendar-server",
     version: "1.0.0",
-    description: "MCP server exposing reservation tools",
+    description: "MCP server for reservations and calendar tools",
     endpoints: {
       tools: "/mcp/tools",
-      run: "/mcp/run/:tool"
+      runTool: "/mcp/run/:tool"
     }
   });
 });
 
-// Tool discovery
 app.get("/mcp/tools", (req, res) => {
   res.json({
-    type: "tool_list",
     tools: [
       {
-        name: "check_availability",
-        description: "Check if a time slot is available",
-        input_schema: {
-          type: "object",
-          properties: {
-            date: { type: "string", format: "date" },
-            time: { type: "string" }
-          },
-          required: ["date", "time"]
-        }
-      },
-      {
         name: "create_reservation",
-        description: "Create a new reservation",
+        description: "Create a reservation in the calendar",
         input_schema: {
           type: "object",
           properties: {
@@ -57,35 +37,22 @@ app.get("/mcp/tools", (req, res) => {
           },
           required: ["customer_name", "party_size", "date", "time"]
         }
-      },
-      {
-        name: "cancel_reservation",
-        description: "Cancel an existing reservation",
-        input_schema: {
-          type: "object",
-          properties: {
-            event_id: { type: "string" }
-          },
-          required: ["event_id"]
-        }
       }
     ]
   });
 });
 
-// Run tool endpoint (dummy for now)
-app.post("/mcp/run/:tool", (req, res) => {
-  const { tool } = req.params;
-  const input = req.body;
+app.post("/mcp/run/create_reservation", (req, res) => {
+  const { customer_name, party_size, date, time, notes } = req.body;
+  console.log("🎯 Reservation received:", req.body);
 
   res.json({
-    type: "tool_response",
-    tool,
-    received: input,
-    note: "This is a dummy response — Google integration not wired yet"
+    success: true,
+    message: `Reservation created for ${customer_name} on ${date} at ${time} for ${party_size} people.`,
+    details: { customer_name, party_size, date, time, notes }
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 MCP server running on port ${PORT}`);
+app.listen(PORT, "0.0.0.0", () => {   // ✅ important: bind to all interfaces
+  console.log(`🚀 MCP server listening on port ${PORT}`);
 });
