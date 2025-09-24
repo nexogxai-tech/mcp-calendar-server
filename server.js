@@ -1,69 +1,63 @@
-import express from "express";
+// server.js
+const express = require("express");
+const bodyParser = require("body-parser");
+const morgan = require("morgan");
 
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-app.use(express.json()); // Parse JSON bodies
+// Middleware
+app.use(bodyParser.json());
+app.use(morgan("⚡ GET :url from :remote-addr accept= :req[accept]"));
 
-// 🛠 /mcp endpoint (always JSON)
+// Root MCP health endpoint
 app.get("/mcp", (req, res) => {
-  console.log("⚡ GET /mcp");
-  res.type("application/json");
   res.json({
     status: "✅ MCP server is running",
-    endpoints: ["/mcp/tools", "/mcp/run/create_reservation"],
+    endpoints: ["/mcp/tools", "/mcp/run/create_reservation"]
   });
 });
 
-// 🛠 /mcp/tools (tool discovery for ElevenLabs or others)
+// Tools endpoint
 app.get("/mcp/tools", (req, res) => {
-  console.log("⚡ GET /mcp/tools");
-  res.type("application/json");
   res.json({
     tools: [
       {
         name: "create_reservation",
-        description:
-          "Creates a calendar reservation in Google Calendar for Café Amore Bistro",
+        description: "Create a new reservation",
         input_schema: {
           type: "object",
           properties: {
             customer_name: { type: "string" },
-            party_size: { type: "integer" },
-            date: { type: "string", format: "date" },
+            party_size: { type: "number" },
+            date: { type: "string" },
             time: { type: "string" },
-            notes: { type: "string" },
+            notes: { type: "string" }
           },
-          required: ["customer_name", "party_size", "date", "time"],
-        },
-      },
-    ],
+          required: ["customer_name", "party_size", "date", "time"]
+        }
+      }
+    ]
   });
 });
 
-// 🛠 /mcp/run/create_reservation (simulate tool execution)
+// Run tool
 app.post("/mcp/run/create_reservation", (req, res) => {
   const { customer_name, party_size, date, time, notes } = req.body;
-
   console.log("🎯 POST /mcp/run/create_reservation payload:", req.body);
 
-  // (Later: connect this to Google Calendar API)
-  res.type("application/json");
   res.json({
     success: true,
-    message: `Reservation created for ${customer_name} on ${date} at ${time} for ${party_size} guests.`,
-    data: { customer_name, party_size, date, time, notes },
+    message: `Reservation created for ${customer_name}, party of ${party_size}, on ${date} at ${time}. Notes: ${notes || "none"}.`
   });
 });
 
-// 🩺 Health check (root)
-app.get("/", (req, res) => {
-  console.log("⚡ GET /");
-  res.type("application/json");
-  res.json({ status: "ok", message: "✅ MCP server is live" });
+// Catch-all for unknown routes
+app.use((req, res) => {
+  res.status(404).json({ error: "❌ Endpoint not found" });
 });
 
-// 🚀 Start server
+// Start server
 app.listen(PORT, () => {
   console.log(`🚀 MCP server listening on port ${PORT}`);
 });
