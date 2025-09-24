@@ -1,36 +1,37 @@
-// server.js
 const express = require("express");
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
 
 const app = express();
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 3000; // ✅ Render assigns PORT automatically
 
-// Middleware
 app.use(bodyParser.json());
-app.use(morgan("⚡ GET :url from :remote-addr accept= :req[accept]"));
+app.use(morgan("⚡ :method :url from :remote-addr"));
 
-// Root MCP health endpoint
 app.get("/mcp", (req, res) => {
   res.json({
-    status: "✅ MCP server is running",
-    endpoints: ["/mcp/tools", "/mcp/run/create_reservation"]
+    name: "calendar-server",
+    version: "1.0.0",
+    description: "MCP server for reservations and calendar tools",
+    endpoints: {
+      tools: "/mcp/tools",
+      runTool: "/mcp/run/:tool"
+    }
   });
 });
 
-// Tools endpoint
 app.get("/mcp/tools", (req, res) => {
   res.json({
     tools: [
       {
         name: "create_reservation",
-        description: "Create a new reservation",
+        description: "Create a reservation in the calendar",
         input_schema: {
           type: "object",
           properties: {
             customer_name: { type: "string" },
             party_size: { type: "number" },
-            date: { type: "string" },
+            date: { type: "string", format: "date" },
             time: { type: "string" },
             notes: { type: "string" }
           },
@@ -41,23 +42,17 @@ app.get("/mcp/tools", (req, res) => {
   });
 });
 
-// Run tool
 app.post("/mcp/run/create_reservation", (req, res) => {
   const { customer_name, party_size, date, time, notes } = req.body;
-  console.log("🎯 POST /mcp/run/create_reservation payload:", req.body);
+  console.log("🎯 Reservation received:", req.body);
 
   res.json({
     success: true,
-    message: `Reservation created for ${customer_name}, party of ${party_size}, on ${date} at ${time}. Notes: ${notes || "none"}.`
+    message: `Reservation created for ${customer_name} on ${date} at ${time} for ${party_size} people.`,
+    details: { customer_name, party_size, date, time, notes }
   });
 });
 
-// Catch-all for unknown routes
-app.use((req, res) => {
-  res.status(404).json({ error: "❌ Endpoint not found" });
-});
-
-// Start server
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {   // ✅ important: bind to all interfaces
   console.log(`🚀 MCP server listening on port ${PORT}`);
 });
