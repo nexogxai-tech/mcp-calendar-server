@@ -6,24 +6,13 @@ const { google } = require("googleapis");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Force redirect to clean domain
-app.use((req, res, next) => {
-  const host = req.headers.host;
-  if (host && host !== "mcp-calendar-server.onrender.com") {
-    return res.redirect(301, `https://mcp-calendar-server.onrender.com${req.originalUrl}`);
-  }
-  next();
-});
-
 app.use(bodyParser.json());
 app.use(morgan("⚡ :method :url from :remote-addr"));
 
 // -----------------------------
-// MCP Router
+// MCP Endpoints
 // -----------------------------
-const mcpRouter = express.Router();
-
-mcpRouter.get("/", (req, res) => {
+app.get("/mcp", (req, res) => {
   res.json({
     name: "calendar-server",
     version: "1.0.0",
@@ -35,7 +24,7 @@ mcpRouter.get("/", (req, res) => {
   });
 });
 
-mcpRouter.get("/tools", (req, res) => {
+app.get("/mcp/tools", (req, res) => {
   res.json({
     tools: [
       {
@@ -57,7 +46,7 @@ mcpRouter.get("/tools", (req, res) => {
   });
 });
 
-mcpRouter.post("/run/create_reservation", (req, res) => {
+app.post("/mcp/run/create_reservation", (req, res) => {
   const { customer_name, party_size, date, time, notes } = req.body;
   console.log("🎯 Reservation received:", req.body);
 
@@ -68,16 +57,13 @@ mcpRouter.post("/run/create_reservation", (req, res) => {
   });
 });
 
-// Mount router at /mcp
-app.use("/mcp", mcpRouter);
-
 // -----------------------------
-// Google OAuth
+// Google OAuth Routes
 // -----------------------------
 const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
-  "https://mcp-calendar-server.onrender.com/oauth2callback"
+  "https://mcp-calendar-server.onrender.com/oauth2callback" // ✅ Clean domain callback
 );
 
 app.get("/", (req, res) => {
@@ -107,3 +93,4 @@ app.get("/oauth2callback", async (req, res) => {
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 MCP + Google OAuth server running on port ${PORT}`);
 });
+
